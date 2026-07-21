@@ -1,12 +1,15 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Client } from "boardgame.io/client";
 import { Local } from "boardgame.io/multiplayer";
 import { LiarsDiceGame } from "./game/game";
 import { pickDumbAction } from "./game/bot";
 import { AI, HUMAN, type LiarsDiceG } from "./rules/types";
+import { makeMatchId } from "./matchId";
 import "./styles.css";
 
 type BgioClient = ReturnType<typeof Client<LiarsDiceG>>;
+
+let matchSerial = 0;
 
 export function App() {
   const [seedInput, setSeedInput] = useState("demo-seed-1");
@@ -17,46 +20,71 @@ export function App() {
   const [G, setG] = useState<LiarsDiceG | null>(null);
   const [currentPlayer, setCurrentPlayer] = useState<string>(HUMAN);
   const [gameover, setGameover] = useState(false);
+  const clientsRef = useRef<{ h: BgioClient; b: BgioClient } | null>(null);
 
-  const boot = useCallback((s: string) => {
-    const matchID = `liars-${s}`;
-    const multiplayer = Local();
-    const h = Client({
-      game: LiarsDiceGame,
-      numPlayers: 2,
-      playerID: HUMAN,
-      matchID,
-      multiplayer,
-      setupData: { seed: s },
-    });
-    const b = Client({
-      game: LiarsDiceGame,
-      numPlayers: 2,
-      playerID: AI,
-      matchID,
-      multiplayer,
-      setupData: { seed: s },
-    });
-    h.start();
-    b.start();
-
-    const sync = () => {
-      const st = h.getState();
-      if (!st) return;
-      setG(st.G);
-      setCurrentPlayer(st.ctx.currentPlayer);
-      setGameover(Boolean(st.ctx.gameover) || st.G.phaseTag === "ended");
-    };
-    h.subscribe(sync);
-    b.subscribe(sync);
-    setHuman(h);
-    setBot(b);
-    sync();
+  const stopClients = useCallback(() => {
+    const prev = clientsRef.current;
+    if (!prev) return;
+    try {
+      prev.h.stop();
+    } catch {
+      /* ignore */
+    }
+    try {
+      prev.b.stop();
+    } catch {
+      /* ignore */
+    }
+    clientsRef.current = null;
   }, []);
+
+  const boot = useCallback(
+    (s: string) => {
+      stopClients();
+      matchSerial += 1;
+      // Unique matchID every boot so Local multiplayer cannot reuse old state
+      const matchID = makeMatchId(s, matchSerial);
+      const multiplayer = Local();
+      const h = Client({
+        game: LiarsDiceGame,
+        numPlayers: 2,
+        playerID: HUMAN,
+        matchID,
+        multiplayer,
+        setupData: { seed: s },
+      });
+      const b = Client({
+        game: LiarsDiceGame,
+        numPlayers: 2,
+        playerID: AI,
+        matchID,
+        multiplayer,
+        setupData: { seed: s },
+      });
+      h.start();
+      b.start();
+      clientsRef.current = { h, b };
+
+      const sync = () => {
+        const st = h.getState();
+        if (!st) return;
+        setG(st.G);
+        setCurrentPlayer(st.ctx.currentPlayer);
+        setGameover(Boolean(st.ctx.gameover) || st.G.phaseTag === "ended");
+      };
+      h.subscribe(sync);
+      b.subscribe(sync);
+      setHuman(h);
+      setBot(b);
+      sync();
+    },
+    [stopClients]
+  );
 
   useEffect(() => {
     boot(seedInput);
-    // initial match only; later starts via buttons
+    return () => stopClients();
+    // initial match only
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -101,7 +129,8 @@ export function App() {
       <h1>Liar&apos;s Dice — Mechanics Prototype</h1>
       <p className="help">
         Wild 1s: face 1 counts only ones; other faces count that face or ones.
-        Overbids allowed. Only your bids score. AI: raise else challenge.
+        Overbids allowed for humans. AI will not raise qty above dice in play
+        (challenges instead). Only your bids score.
       </p>
 
       <section className="panel">
@@ -112,7 +141,10 @@ export function App() {
             onChange={(e) => setSeedInput(e.target.value)}
           />
         </label>
-        <button type="button" onClick={() => boot(seedInput || `seed-${Date.now()}`)}>
+        <button
+          type="button"
+          onClick={() => boot(seedInput || `seed-${Date.now()}`)}
+        >
           New blind
         </button>
         <button

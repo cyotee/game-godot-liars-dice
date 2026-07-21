@@ -61,9 +61,7 @@ describe("LiarsDiceGame via Client", () => {
   it("pickDumbAction returns bid or challenge", () => {
     const client = makeClient("bot-seed");
     client.moves.bid(1, 2);
-    // G after human bid from human view
     const G = client.getState()!.G;
-    // Construct AI view of G with bid present
     const action = pickDumbAction({
       ...G,
       currentBid: { qty: 1, face: 2 },
@@ -72,6 +70,57 @@ describe("LiarsDiceGame via Client", () => {
     if (action.type === "bid") {
       expect(action.face).toBeGreaterThanOrEqual(1);
     }
+  });
+
+  it("AI challenges via Local when human bids qty at total dice and face 6", async () => {
+    const { Local } = await import("boardgame.io/multiplayer");
+    const multiplayer = Local();
+    const matchID = "ai-challenge-total-dice";
+    const seed = "ai-chal-seed";
+    // High target so a 10×6 bid does not instantly win on score
+    const game = {
+      ...LiarsDiceGame,
+      setup: (ctx: unknown, data: { seed?: string; targetScore?: number } | undefined) => {
+        const base = (
+          LiarsDiceGame.setup as (
+            c: unknown,
+            d: unknown
+          ) => import("../rules/types").LiarsDiceG
+        )(ctx, { seed, targetScore: 50_000, ...data });
+        base.targetScore = 50_000;
+        return base;
+      },
+    };
+    const h = Client({
+      game,
+      numPlayers: 2,
+      playerID: HUMAN,
+      matchID,
+      multiplayer,
+      setupData: { seed, targetScore: 50_000 },
+    });
+    const a = Client({
+      game,
+      numPlayers: 2,
+      playerID: AI,
+      matchID,
+      multiplayer,
+      setupData: { seed, targetScore: 50_000 },
+    });
+    h.start();
+    a.start();
+    expect(h.getState()!.G.targetScore).toBe(50_000);
+    // total dice = 10; bid 10×6 → AI must challenge (cannot face+1 or qty+1 under policy)
+    h.moves.bid(10, 6);
+    expect(h.getState()!.G.phaseTag).toBe("playing");
+    expect(a.getState()!.ctx.currentPlayer).toBe(AI);
+    const action = pickDumbAction(a.getState()!.G);
+    expect(action).toEqual({ type: "challenge" });
+    a.moves.challenge();
+    const G = h.getState()!.G;
+    expect(G.lastReveal).not.toBeNull();
+    // human was bidder; resolution bonus applied
+    expect(G.score).toBeGreaterThanOrEqual(RESOLUTION_BONUS);
   });
 
   it("score win when target low", () => {
