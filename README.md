@@ -1,18 +1,26 @@
 # game-godot-liars-dice
 
-Godot 4 **Liar’s Dice** game (single-player + multiplayer).
+Godot 4 **Liar’s Dice** game (Balatro-like fusion per [DESIGN.md](./DESIGN.md)).
 
-**Status:** Repository bootstrap. Product requirements and implementation plan come next (`PRD.md`, then design/implementation plan).
+**Status:** Design drafted; **mechanics prototype PRD** ready. Godot game implementation follows after the prototype validates the loop.
+
+## Docs
+
+| Doc | Purpose |
+|-----|---------|
+| [DESIGN.md](./DESIGN.md) | Full game design (Balatro × Liar’s Dice) |
+| [prototype/PRD.md](./prototype/PRD.md) | **Vite form prototype** PRD (next build step) |
 
 ## Planned stack
 
-- **Engine:** Godot 4.x (GDScript)
-- **Fair play:** [@cyotee/fairplay-crypto-godot](https://github.com/cyotee/fairplay-crypto-godot) (commit–reveal / multiplayer fairness)
-- **Stores (intent):** Steam, Itch.io, GOG, Android Play, Apple App Store; free web multiplayer-only build
+- **Prototype (now):** Vite + TypeScript form UI — rules + scoring, no graphics  
+- **Game (later):** Godot 4.x (GDScript)  
+- **Fair play (later / multiplayer):** [fairplay-crypto-godot](https://github.com/cyotee/fairplay-crypto-godot)  
+- **Stores (intent):** Steam, Itch.io, GOG, Android Play, Apple App Store; free web multiplayer-only build  
 
 ## Monorepo
 
-Also a submodule of [manamesh-games](https://github.com/cyotee/manamesh-games) at `packages/game-godot-liars-dice`.
+Submodule of [manamesh-games](https://github.com/cyotee/manamesh-games) at `packages/game-godot-liars-dice`.
 
 ## License
 
