@@ -9,7 +9,8 @@ Godot 4 **Liar’s Dice** game (Balatro-like fusion per [DESIGN.md](./DESIGN.md)
 | Doc | Purpose |
 |-----|---------|
 | [DESIGN.md](./DESIGN.md) | Full game design (Balatro × Liar’s Dice) |
-| [prototype/PRD.md](./prototype/PRD.md) | **Vite form prototype** PRD (next build step) |
+| [prototype/PRD.md](./prototype/PRD.md) | Vite + boardgame.io mechanics prototype PRD |
+| [prototype/IMPLEMENTATION_PLAN.md](./prototype/IMPLEMENTATION_PLAN.md) | boardgame.io implementation plan |
 
 ## Planned stack
 

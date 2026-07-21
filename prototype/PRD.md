@@ -6,7 +6,8 @@
 | **Parent game** | [game-godot-liars-dice](https://github.com/cyotee/game-godot-liars-dice) (Balatro-like fusion per `DESIGN.md`) |
 | **Path** | `packages/game-godot-liars-dice/prototype/` |
 | **Status** | Planning → ready for implementation |
-| **Stack** | **Vite + TypeScript + Vitest** |
+| **Stack** | **boardgame.io** + **Vite** + **TypeScript** + **Vitest** |
+| **Implementation plan** | [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) |
 | **License** | **BUSL 1.1** (same as parent game repo) |
 | **Last updated** | 2026-07-21 |
 
