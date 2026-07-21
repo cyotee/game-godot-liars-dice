@@ -16,4 +16,10 @@ Also a submodule of [manamesh-games](https://github.com/cyotee/manamesh-games) a
 
 ## License
 
-MIT — see [LICENSE](./LICENSE).
+**Business Source License 1.1 (BUSL-1.1)** — see [LICENSE](./LICENSE).
+
+- Non-production use is permitted under BUSL 1.1.
+- **Change Date:** 2030-07-21  
+- **Change License:** GPL-2.0-or-later  
+
+This is **not** an OSI open-source license until the Change Date (or four years after a given version’s first public release, whichever comes first).
