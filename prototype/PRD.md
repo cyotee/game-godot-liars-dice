@@ -74,6 +74,7 @@ A **Vite form prototype** answers these with low overhead and **unit-testable pu
 2. **Vitest** coverage for bid validity, wild counts, challenge outcomes, scoring contributions, seed stability for rolls.
 3. One-command dev (`yarn`/`npm` + `vite`) and `vitest` from the prototype package.
 4. Keep code **portable** (clear function boundaries for future Godot GDScript ports).
+5. Use **boardgame.io** for authoritative moves, turns, secret state (`playerView`), bots, and `testing` Client (see implementation plan).
 
 ### 2.3 Non-goals (v1)
 

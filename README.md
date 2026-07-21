@@ -14,7 +14,7 @@ Godot 4 **Liar’s Dice** game (Balatro-like fusion per [DESIGN.md](./DESIGN.md)
 
 ## Planned stack
 
-- **Prototype (now):** Vite + TypeScript form UI — rules + scoring, no graphics  
+- **Prototype (now):** boardgame.io + Vite form UI — rules + scoring, no graphics  
 - **Game (later):** Godot 4.x (GDScript)  
 - **Fair play (later / multiplayer):** [fairplay-crypto-godot](https://github.com/cyotee/fairplay-crypto-godot)  
 - **Stores (intent):** Steam, Itch.io, GOG, Android Play, Apple App Store; free web multiplayer-only build  
