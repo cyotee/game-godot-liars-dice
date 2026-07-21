@@ -26,6 +26,10 @@
 | 8 | **Location** | Live under `prototype/` in the game submodule. |
 | 9 | **License** | BUSL 1.1 (repo root LICENSE applies). |
 | 10 | **Out of scope (v1)** | Godot project; shop / full ante run; real AI ranks/personalities; polish UI/art; FairPlay/crypto; multiplayer; Tarots/Vouchers catalog; Boss modifiers. |
+| 11 | **Resolution bonus** | Flat **+30** to player score when human is bidder or challenger on a challenge. |
+| 12 | **Overbids** | **Allowed** — qty may exceed total dice in play (bluffs). |
+| 13 | **Next sub-round starter** | **Loser of the challenge** (if still has dice); if loser is out, the remaining player starts. |
+| 14 | **Package layout** | **Standalone** `prototype/package.json` (install/run inside `prototype/`; not a root Yarn workspace). |
 
 ### Relationship to DESIGN.md
 
@@ -128,7 +132,7 @@ A **Vite form prototype** answers these with low overhead and **unit-testable pu
 ### 4.2 Bidding
 
 - Bid = `(qty, face)` with `qty ≥ 1`, `face ∈ 1..6`.
-- First bid of a sub-round: any valid qty/face with `qty ≤ total_dice_in_play` (optional soft cap: allow overbid for bluffs — **allow qty up to sum of all dice in play**; overbids are legal bluffs).
+- First bid of a sub-round: any `qty ≥ 1`, `face ∈ 1..6`. **Overbids allowed** (qty may exceed total dice in play).
 - Subsequent bid must be **strictly higher**:
   - `new_qty > old_qty`, **or**
   - `new_qty == old_qty` and `new_face > old_face`.
@@ -140,7 +144,7 @@ A **Vite form prototype** answers these with low overhead and **unit-testable pu
 - If `actual >= bid.qty`: bid was good → **challenger loses 1 die**.
 - Else: bid was bad → **bidder loses 1 die**.
 - If a player reaches 0 dice: they are out. With only 2 players, match ends.
-- After a challenge that does not end the blind: **new roll** for remaining players with dice; clear current bid; loser of challenge (or winner of prior — **use DESIGN default: loser of challenge starts next sub-round if still in**; if loser is out, other player starts).
+- After a challenge that does not end the blind: **new roll** for remaining players with dice; clear current bid; **loser of the challenge starts** the next sub-round if they still have dice; if the loser is eliminated, the remaining player starts.
 
 ### 4.4 Turns
 
@@ -191,7 +195,7 @@ No other Planets, no Jokers required in v1.
 ### 5.3 When score is applied
 
 1. **On each successful human bid:** compute base → apply Planet if category matches → `contrib = floor(chips * mult)` → add to score; log breakdown.
-2. **On challenge resolution if human is bidder or challenger:** add a small fixed **resolution bonus** (DESIGN example used +30 chips as contrib when challenger — use `RESOLUTION_BONUS_CHIPS = 30` as flat contrib for v1, or chips×mult=1.0). Document choice in code.
+2. **On challenge resolution if human is bidder or challenger:** add flat **`RESOLUTION_BONUS = 30`** to player score (not run through Planet/mult).
 
 ### 5.4 Actions tracking (optional for v1)
 
@@ -259,7 +263,7 @@ prototype/
 
 - `rules/` and `scoring/` have **zero** DOM imports.
 - UI only calls pure functions + mutates a single blind state object/class.
-- Yarn monorepo: prefer `package.json` name such as `liars-dice-prototype` with scripts `dev`, `test`, `build`.
+- Standalone package: `package.json` name e.g. `liars-dice-prototype` with scripts `dev`, `test`, `build`. Install and run **inside** `prototype/` (not registered as a root monorepo workspace unless we choose to later).
 
 ---
 
@@ -318,9 +322,7 @@ Suggested order of PRs if splitting: P0+P1 → P2 → P3+P4 → P5.
 
 ## 12. Open items (non-blocking)
 
-1. Exact dumb-AI raise priority table (document in `ai.ts` header).
-2. Whether resolution bonus is flat 30 or scored like a bid (default: **flat 30**).
-3. Monorepo workspace registration (optional; can be standalone package with own yarn/npm).
+1. Exact dumb-AI raise priority micro-table (document in `ai.ts` header; PRD allows simple raise-else-challenge).
 
 ---
 
@@ -328,7 +330,7 @@ Suggested order of PRs if splitting: P0+P1 → P2 → P3+P4 → P5.
 
 Implementation of the prototype may be considered **done** when:
 
-- [x] This PRD captures locked stakeholder decisions  
+- [x] This PRD captures locked stakeholder decisions (including resolution bonus, overbids, next-starter, package layout)  
 - [ ] `prototype/` runs via Vite and presents the form UI  
 - [ ] One human + one AI blind is playable end-to-end  
 - [ ] Win by score or elimination; loss on 0 human dice  
@@ -344,3 +346,4 @@ Implementation of the prototype may be considered **done** when:
 | Date | Change |
 |------|--------|
 | 2026-07-21 | Initial PRD for Vite form-based mechanics prototype |
+| 2026-07-21 | Lock: flat +30 resolution bonus; overbids OK; challenge loser starts next; standalone package.json |
